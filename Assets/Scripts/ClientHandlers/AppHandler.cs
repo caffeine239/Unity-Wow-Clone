@@ -33,8 +33,9 @@ public class AppHandler : MonoBehaviour
     private Dictionary<string, MpqArchive> blpEntries = new Dictionary<string, MpqArchive>();
     private Dictionary<string, MpqArchive> blsEntries = new Dictionary<string, MpqArchive>();
     private Dictionary<string, MpqArchive> audioEntries = new Dictionary<string, MpqArchive>();
-    private Dictionary<string, Texture2D> loadedCursors = new Dictionary<string, Texture2D>();
-    private Dictionary<string, Sprite> loadedLoadingScreens = new Dictionary<string, Sprite>();
+
+    private Dictionary<string, Texture2D> cursorCache = new Dictionary<string, Texture2D>();
+    private Dictionary<string, Sprite> loadingScreenCache = new Dictionary<string, Sprite>();
 
     // Start is called before the first frame update
     void Start()
@@ -50,7 +51,7 @@ public class AppHandler : MonoBehaviour
         WEBSITE_LINK = @"https://worldofwarcraft.com/en-us/";
         MANAGE_ACCOUNT_LINK = @"https://account.battle.net/";
 
-        ReadRealmlistFile();
+        ReadWTFfile();
 
         LoadedMPQs = new List<MpqArchive>();
         LoadMPQFiles();
@@ -224,17 +225,17 @@ public class AppHandler : MonoBehaviour
     {
         Texture2D newPointer = null;
 
-        if (loadedCursors.ContainsKey(pointerLocation.ToUpper()))
-            newPointer = loadedCursors[pointerLocation.ToUpper()];
+        if (cursorCache.ContainsKey(pointerLocation.ToUpper()))
+            newPointer = cursorCache[pointerLocation.ToUpper()];
         else
         {
-            loadedCursors.Add(pointerLocation.ToUpper(), BLPLoader.ToTex(SearchMPQ(pointerLocation)));
-            newPointer = loadedCursors[pointerLocation.ToUpper()];
+            cursorCache.Add(pointerLocation.ToUpper(), BLPLoader.ToTex(SearchMPQ(pointerLocation)));
+            newPointer = cursorCache[pointerLocation.ToUpper()];
         }
         
         Cursor.SetCursor(newPointer, hotSpot, cursorMode);
     }
-    public void ReadRealmlistFile()
+    public void ReadWTFfile()
     {
         string path = @Application.dataPath + "/data.wtf";
         if (!File.Exists(path))
@@ -249,6 +250,7 @@ public class AppHandler : MonoBehaviour
                 w.WriteLine("LAST_KNOWN_MPQ_DATA_FOLDER " + LAST_KNOWN_MPQ_DATA_FOLDER);
                 w.WriteLine("WEBSITE_LINK " + WEBSITE_LINK);
                 w.WriteLine("MANAGE_ACCOUNT_LINK " + MANAGE_ACCOUNT_LINK);
+                w.Close();
             }
         }
 
@@ -282,7 +284,7 @@ public class AppHandler : MonoBehaviour
             }
         }
     }
-    public void WriteRealmlistFile()
+    public void WriteWTFfile()
     {
         string path = @Application.dataPath + "/data.wtf";
         if (!File.Exists(path))

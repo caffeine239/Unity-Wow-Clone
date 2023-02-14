@@ -38,6 +38,8 @@ public class LoginUIHandler : MonoBehaviour
         BuildBackground();
         BuildLoginUI();
         BuildDialogUI();
+
+        LoginGlueInputFields[0].Select();
     }
     void BuildBackground()
     {
@@ -287,14 +289,13 @@ public class LoginUIHandler : MonoBehaviour
             Transform[] ts = button.transform.GetComponentsInChildren<Transform>(true);
             foreach (Transform t in ts)
             {
+                Color isRealmOnlineColor = newRealm.wOnline == 0 ? Color.gray : Color.white;
+                
                 if (t.gameObject.name == "RealmName")
                 {
                     Text realmText = t.gameObject.GetComponent<Text>();
                     realmText.text = newRealm.Name;
-                    if (newRealm.wOnline == 0)
-                    { realmText.color = Color.gray; }
-                    else { realmText.color = Color.white; }
-
+                    realmText.color = isRealmOnlineColor;
                     realmText.enabled = true;
                 }
                 if (t.gameObject.name == "RealmType")
@@ -324,20 +325,14 @@ public class LoginUIHandler : MonoBehaviour
                     }
 
                     typeText.text = realmType;
-                    if (newRealm.wOnline == 0)
-                    { typeText.color = Color.gray; }
-                    else { typeText.color = Color.white; }
-
+                    typeText.color = isRealmOnlineColor;
                     typeText.enabled = true;
                 }
                 if (t.gameObject.name == "RealmCharacters")
                 {
                     Text charachterText = t.gameObject.GetComponent<Text>();
                     charachterText.text = "(" + newRealm.NumChars.ToString() + ")";
-                    if (newRealm.wOnline == 0)
-                    { charachterText.color = Color.gray; }
-                    else { charachterText.color = Color.white; }
-
+                    charachterText.color = isRealmOnlineColor;
                     charachterText.enabled = true;
                 }
                 if (t.gameObject.name == "RealmPop")
@@ -359,15 +354,8 @@ public class LoginUIHandler : MonoBehaviour
                             break;
                     }
 
-
                     RealmPopText.text = popLevel;
-                    if (newRealm.wOnline == 0)
-                    {
-                        RealmPopText.color = Color.gray;
-                        RealmPopText.text = "Offline";
-                    }
-                    else { RealmPopText.color = Color.white; }
-
+                    RealmPopText.color = isRealmOnlineColor;
                     RealmPopText.enabled = true;
                 }
             }
@@ -380,13 +368,9 @@ public class LoginUIHandler : MonoBehaviour
     }
     public void HideRealmUI()
     {
-
-    }    
-    void DisplayCharacterUI()
-    {
-
+        LoginUIPanels.First(m => m.name == "RealmListPanel").SetActive(false);
     }
-    void HideCharacterUI()
+    void SelectRealm(Realm realm)
     {
 
     }
@@ -443,10 +427,7 @@ public class LoginUIHandler : MonoBehaviour
 
         Application.Quit();
     }
-    void Empty()
-    {
-
-    }
+    void Empty() { }
     // Update is called once per frame
     void Update()
     {

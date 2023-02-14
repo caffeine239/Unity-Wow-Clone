@@ -10,7 +10,7 @@ public class SceneHandler : MonoBehaviour
     {
         if (!IsSceneLoaded("Auth"))
         {
-            StartCoroutine(LoadScene("Auth", LoadSceneMode.Additive));
+            SwitchToAuthScene();
         }
     }
 
@@ -19,7 +19,22 @@ public class SceneHandler : MonoBehaviour
     {
         
     }
+    public void SwitchToWorldScene()
+    {
+        if (IsSceneLoaded("Auth"))
+            StartCoroutine(UnloadScene("Auth"));
 
+        if (!IsSceneLoaded("World"))
+            StartCoroutine(LoadScene("World", LoadSceneMode.Additive));
+    }
+    public void SwitchToAuthScene()
+    {
+        if (IsSceneLoaded("World"))
+            StartCoroutine(UnloadScene("World"));
+
+        if (!IsSceneLoaded("Auth"))
+            StartCoroutine(LoadScene("Auth", LoadSceneMode.Additive));
+    }
     internal IEnumerator LoadScene(string sceneName, LoadSceneMode mode)
     {
         yield return SceneManager.LoadSceneAsync(sceneName, mode);

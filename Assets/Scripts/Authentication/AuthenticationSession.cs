@@ -12,19 +12,10 @@ public class AuthenticationSession
     NetworkHandler mainNetwork;
     byte[] version = new byte[] { 3, 3, 5 };
     ushort build = 12340;
-    public string mUsername;
-    public string mPassword;
+    public string mUsername, mPassword;
     private Srp6 srp;
-    private BigInteger A;
-    private BigInteger B;
-    private BigInteger a;
-    private byte[] I;
-    private BigInteger M;
-    private byte[] N;
-    private byte[] g;
-    public byte[] mKey;
-    private BigInteger Salt;
-    private byte[] crcsalt;
+    private BigInteger A, B, a, M, Salt;
+    private byte[] I, N, g, mKey, crcsalt;
 
     public AuthenticationSession(NetworkHandler _mainNetwork, string Username, string Password)
     {
@@ -49,26 +40,46 @@ public class AuthenticationSession
     {
         PacketWriter packet = new PacketWriter(AuthOpcode.AUTH_LOGON_CHALLENGE);
 
+        string g = "WoW";
+        string f = "x86";
+        string e = "Win";
+        string l = "enUS";
+
         packet.Write((byte)6);
         packet.Write((UInt16)(30 + mUsername.Length));
-        packet.Write((byte)'W');
-        packet.Write((byte)'o');
-        packet.Write((byte)'W');
+
+        var gb = Encoding.UTF8.GetBytes(g);
+        for (int i = gb.Length - 1; i >= 0; i--)
+        {
+            packet.Write(gb[i]);
+        }
+
         packet.Write((byte)'\0');
         packet.Write(version);
         packet.Write(build);
-        packet.Write((byte)'6');
-        packet.Write((byte)'8');
-        packet.Write((byte)'x');
+
+        var fb = Encoding.UTF8.GetBytes(f);
+        for (int i = fb.Length - 1; i >= 0; i--)
+        {
+            packet.Write(fb[i]);
+        }
+
         packet.Write((byte)'\0');
-        packet.Write((byte)'n');
-        packet.Write((byte)'i');
-        packet.Write((byte)'W');
+
+        var eb = Encoding.UTF8.GetBytes(e);
+        for (int i = eb.Length - 1; i >= 0; i--)
+        {
+            packet.Write(eb[i]);
+        }
+
         packet.Write((byte)'\0');
-        packet.Write((byte)'S');
-        packet.Write((byte)'U');
-        packet.Write((byte)'n');
-        packet.Write((byte)'e');
+
+        var lb = Encoding.UTF8.GetBytes(l);
+        for (int i = lb.Length - 1; i >= 0; i--)
+        {
+            packet.Write(lb[i]);
+        }
+
         packet.Write((uint)0x3c);
         packet.Write(BitConverter.ToUInt32((mainNetwork.mSocket.LocalEndPoint as IPEndPoint).Address.GetAddressBytes(), 0));
 
@@ -265,15 +276,13 @@ public class AuthenticationSession
     }
     private bool CheckAvailableServerPort(string port)
     {
-        Socket testSocket;
-        string[] address = port.Split(':');
-        IPAddress WSAddr = Dns.GetHostAddresses(address[0])[0];
-        int WSPort = Int32.Parse(address[1]);
-        IPEndPoint ep = new IPEndPoint(WSAddr, WSPort);
-
         try
         {
-            testSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.IP);
+            string[] address = port.Split(':');
+            IPAddress WSAddr = Dns.GetHostAddresses(address[0])[0];
+            int WSPort = int.Parse(address[1]);
+            IPEndPoint ep = new IPEndPoint(WSAddr, WSPort);
+            Socket testSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.IP);
             testSocket.Connect(ep);
             testSocket.Close();
 
