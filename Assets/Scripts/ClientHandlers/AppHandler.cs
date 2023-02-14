@@ -48,7 +48,7 @@ public class AppHandler : MonoBehaviour
         REALM_LIST_ADDRESS = "127.0.0.1";
         LAST_KNOWN_REALM_PORT = 3724;
         LAST_KNOWN_MPQ_DATA_FOLDER = @Application.dataPath + "/Data/";
-        WEBSITE_LINK = @"https://worldofwarcraft.com/en-us/";
+        WEBSITE_LINK = @"https://wowclassic.blizzard.com/en-us/";
         MANAGE_ACCOUNT_LINK = @"https://account.battle.net/";
 
         ReadWTFfile();
