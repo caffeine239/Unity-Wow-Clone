@@ -5,19 +5,18 @@ using UnityEngine.SceneManagement;
 
 public class SceneHandler : MonoBehaviour
 {
+    public static SceneHandler Instance;
     // Start is called before the first frame update
-    void Start()
+    public static void OnLoad()
     {
-        if (!IsSceneLoaded("Auth"))
+        if (Instance != null)
         {
-            SwitchToAuthScene();
+            return;
         }
-    }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
+        GameObject go = new GameObject("Scene Handler");
+        SceneHandler newManager = go.AddComponent<SceneHandler>();
+        Instance = newManager;
     }
     public void SwitchToWorldScene()
     {

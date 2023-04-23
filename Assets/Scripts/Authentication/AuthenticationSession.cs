@@ -25,7 +25,7 @@ public class AuthenticationSession
 
         LoginUIHandler.LoginUIInstance.DisplayDialogUI("Connecting...", "Cancel", "", CloseAuthAttempt);
 
-        if (mainNetwork.ConnectToSocket(AppHandler.Instance.REALM_LIST_ADDRESS, AppHandler.Instance.LAST_KNOWN_REALM_PORT))
+        if (mainNetwork.ConnectToSocket(SettingsHandler.Instance.REALM_LIST_ADDRESS, SettingsHandler.Instance.LAST_KNOWN_REALM_PORT))
         {
             Authenticate();
         }
@@ -250,7 +250,7 @@ public class AuthenticationSession
                     realms[i].build = packetIn.ReadUInt16();
                 }
 
-                if (realms[i].Name.Contains(AppHandler.Instance.LAST_KNOWN_REALMNAME) && realms[i].Name.Length == AppHandler.Instance.LAST_KNOWN_REALMNAME.Length)
+                if (realms[i].Name.Contains(SettingsHandler.Instance.LAST_KNOWN_REALMNAME) && realms[i].Name.Length == SettingsHandler.Instance.LAST_KNOWN_REALMNAME.Length)
                 {
                     LastKnownRealm = realms[i];
                 }
@@ -262,7 +262,7 @@ public class AuthenticationSession
             LoginUIHandler.LoginUIInstance.DisplayDialogUI("Error Retrieving Realm List.", "Okay", "", CloseAuthAttempt);
         }
 
-        if (LastKnownRealm.Name == AppHandler.Instance.LAST_KNOWN_REALMNAME && LastKnownRealm.Name.Length == AppHandler.Instance.LAST_KNOWN_REALMNAME.Length)
+        if (LastKnownRealm.Name == SettingsHandler.Instance.LAST_KNOWN_REALMNAME && LastKnownRealm.Name.Length == SettingsHandler.Instance.LAST_KNOWN_REALMNAME.Length)
         {
             if (LastKnownRealm.wOnline == 1)
             {

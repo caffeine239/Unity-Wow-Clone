@@ -19,8 +19,8 @@ public class LoginUIHandler : MonoBehaviour
     public List<GameObject> LoginUIPanels;
     public AudioSource Audio;
     public Camera camera;
+    public TMP_Dropdown RealmListDropDown;
     private bool wasRealmUIBuilt = false;
-    private bool wasCharacterUIBuilt = false;
 
     // Start is called before the first frame update
     void Start()
@@ -30,10 +30,16 @@ public class LoginUIHandler : MonoBehaviour
 
         LoginUIInstance = this;
 
-        Audio.clip = WavUtility.ToAudioClip(AppHandler.Instance.SearchMPQ(@"Sound\Music\GlueScreenMusic\WotLK_main_title.mp3"));
-        Audio.Play();
+        RealmListDropDown.ClearOptions();
+        RealmListDropDown.onValueChanged.AddListener(delegate { RealmListDropDownChanged(RealmListDropDown); });        
+        foreach (var item in SettingsHandler.Instance.realmListEntries)
+        {
+            RealmListDropDown.options.Add(new TMP_Dropdown.OptionData() { text = "Address: " + item.Key[0].ToString() + " Realm Name: " + item.Key[1].ToString() + " Port:" + item.Value.ToString() });
+        }
+        RealmListDropDown.options.Add(new TMP_Dropdown.OptionData() { text = "    Add new Realm address    " });
+        RealmListDropDown.RefreshShownValue();
 
-        LoginGlueTexts.First(m => m.name == "RealmName").text = AppHandler.Instance.LAST_KNOWN_REALMNAME;
+        AudioHandler.Instance.CreateAudioStream(@"Sound\Music\GlueScreenMusic\WotLK_main_title.mp3");
 
         BuildBackground();
         BuildLoginUI();
@@ -392,11 +398,11 @@ public class LoginUIHandler : MonoBehaviour
     }
     void AccountManage()
     {
-        Application.OpenURL(AppHandler.Instance.MANAGE_ACCOUNT_LINK);
+        Application.OpenURL(SettingsHandler.Instance.MANAGE_ACCOUNT_LINK);
     }
     void Website()
     {
-        Application.OpenURL(AppHandler.Instance.WEBSITE_LINK);
+        Application.OpenURL(SettingsHandler.Instance.WEBSITE_LINK);
     }
     void Login()
     {
@@ -425,12 +431,24 @@ public class LoginUIHandler : MonoBehaviour
             AppHandler.Instance.LoadedMPQs[i].Dispose();
         }
 
-        Application.Quit();
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#else
+                Application.Quit(0);
+#endif
+
+    }
+    void RealmListDropDownChanged(TMP_Dropdown RealmListDropDown)
+    {
+        int i = RealmListDropDown.value;
+        //RealmListDropDown.ClearOptions();
+        //RealmListDropDown.onValueChanged.AddListener(delegate { RealmListDropDownChanged(RealmListDropDown); });
+        //foreach (var item in SettingsHandler.Instance.realmListEntries)
+        //{
+        //    RealmListDropDown.options.Add(new TMP_Dropdown.OptionData() { text = "Address: " + item.Key[0].ToString() + " Realm Name: " + item.Key[1].ToString() + " Port:" + item.Value.ToString() });
+        //}
+        //RealmListDropDown.options.Add(new TMP_Dropdown.OptionData() { text = "    Add new Realm address    " });
+        //RealmListDropDown.RefreshShownValue();
     }
     void Empty() { }
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
 }

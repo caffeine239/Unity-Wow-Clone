@@ -15,17 +15,18 @@ public class NetworkHandler : MonoBehaviour
     public WorldSession _worldSession;
     public Queue QueuedPackets = null;
 
-    // Start is called before the first frame update
-    void Start()
+    public static void OnLoad()
     {
         if (mainNetwork != null)
+        {
             return;
+        }
 
-        mainNetwork = this;
-
-        QueuedPackets = new Queue();
+        GameObject go = new GameObject("Network Handler");
+        NetworkHandler newManager = go.AddComponent<NetworkHandler>();
+        mainNetwork = newManager;
+        mainNetwork.QueuedPackets = new Queue();
     }
-
     // Update is called once per frame
     void Update()
     {
@@ -62,7 +63,10 @@ public class NetworkHandler : MonoBehaviour
 
     public bool ConnectToSocket(string address, int port, bool worldConnect = false)
     {
-        ConnectedToWorld = worldConnect;
+        if (worldConnect)
+        {
+            Disconnect();
+        }
 
         Regex DnsMatch = new Regex("[a-zA-Z]");
         IPAddress ASAddr;
@@ -78,6 +82,9 @@ public class NetworkHandler : MonoBehaviour
 
             mSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.IP);
             mSocket.Connect(ASDest);
+
+            ConnectedToWorld = worldConnect;
+
             return true;
         }
         catch
@@ -97,12 +104,17 @@ public class NetworkHandler : MonoBehaviour
     {
         get
         {
+            bool connected = !((mSocket.Poll(1000, SelectMode.SelectRead) && (mSocket.Available == 0)) || !mSocket.Connected);
             try
             {
-                return !((mSocket.Poll(1000, SelectMode.SelectRead) && (mSocket.Available == 0)) || !mSocket.Connected);
+                if(!connected)
+                    ConnectedToWorld = false;
+
+                return connected;
             }
             catch
             {
+                ConnectedToWorld = false;
                 return false;
             }
         }
@@ -111,5 +123,6 @@ public class NetworkHandler : MonoBehaviour
     {
         mSocket.Shutdown(SocketShutdown.Both);
         mSocket.Disconnect(false);
+        mSocket.Dispose();
     }
 }

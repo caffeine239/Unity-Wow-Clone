@@ -1,6 +1,7 @@
 ﻿using Foole.Mpq;
 using System.Collections.Generic;
 using System.IO;
+using System.Xml;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -10,29 +11,23 @@ public class AppHandler : MonoBehaviour
     public Image _image;
     public CursorMode cursorMode = CursorMode.Auto;
     public Vector2 hotSpot = Vector2.zero;
-    
-    public string REALM_LIST_ADDRESS = " ";
-    public string LAST_KNOWN_REALMNAME = " ";
-    public int LAST_KNOWN_REALM_PORT = 0;
-    public string LAST_KNOWN_MPQ_DATA_FOLDER = " ";
-    public string WEBSITE_LINK = " ";
-    public string MANAGE_ACCOUNT_LINK = " ";
 
-    public List<MpqArchive> LoadedMPQs;
+    public List<MpqArchive> LoadedMPQs = new List<MpqArchive>();
 
-    private Dictionary<string, MpqArchive> xmlEntries = new Dictionary<string, MpqArchive>();
-    private Dictionary<string, MpqArchive> adtEntries = new Dictionary<string, MpqArchive>();
-    private Dictionary<string, MpqArchive> wdtEntries = new Dictionary<string, MpqArchive>();
-    private Dictionary<string, MpqArchive> wdlEntries = new Dictionary<string, MpqArchive>();
-    private Dictionary<string, MpqArchive> m2Entries = new Dictionary<string, MpqArchive>();
-    private Dictionary<string, MpqArchive> wmoEntries = new Dictionary<string, MpqArchive>();
-    private Dictionary<string, MpqArchive> skinEntries = new Dictionary<string, MpqArchive>();
-    private Dictionary<string, MpqArchive> animEntries = new Dictionary<string, MpqArchive>();
-    private Dictionary<string, MpqArchive> dbcEntries = new Dictionary<string, MpqArchive>();
-    private Dictionary<string, MpqArchive> wdbEntries = new Dictionary<string, MpqArchive>();
-    private Dictionary<string, MpqArchive> blpEntries = new Dictionary<string, MpqArchive>();
-    private Dictionary<string, MpqArchive> blsEntries = new Dictionary<string, MpqArchive>();
-    private Dictionary<string, MpqArchive> audioEntries = new Dictionary<string, MpqArchive>();
+    private Dictionary<string, int> xmlEntries = new Dictionary<string, int>();
+    private Dictionary<string, int> adtEntries = new Dictionary<string, int>();
+    private Dictionary<string, int> wdtEntries = new Dictionary<string, int>();
+    private Dictionary<string, int> wdlEntries = new Dictionary<string, int>();
+    private Dictionary<string, int> m2Entries = new Dictionary<string, int>();
+    private Dictionary<string, int> wmoEntries = new Dictionary<string, int>();
+    private Dictionary<string, int> skinEntries = new Dictionary<string, int>();
+    private Dictionary<string, int> animEntries = new Dictionary<string, int>();
+    private Dictionary<string, int> dbcEntries = new Dictionary<string, int>();
+    private Dictionary<string, int> wdbEntries = new Dictionary<string, int>();
+    private Dictionary<string, int> blpEntries = new Dictionary<string, int>();
+    private Dictionary<string, int> blsEntries = new Dictionary<string, int>();
+    private Dictionary<string, int> audioEntries = new Dictionary<string, int>();
+    private Dictionary<string, int> luaEntries = new Dictionary<string, int>();
 
     private Dictionary<string, Texture2D> cursorCache = new Dictionary<string, Texture2D>();
     private Dictionary<string, Sprite> loadingScreenCache = new Dictionary<string, Sprite>();
@@ -45,22 +40,20 @@ public class AppHandler : MonoBehaviour
 
         Instance = this;
 
-        REALM_LIST_ADDRESS = "127.0.0.1";
-        LAST_KNOWN_REALM_PORT = 3724;
-        LAST_KNOWN_MPQ_DATA_FOLDER = @Application.dataPath + "/Data/";
-        WEBSITE_LINK = @"https://wowclassic.blizzard.com/en-us/";
-        MANAGE_ACCOUNT_LINK = @"https://account.battle.net/";
+        SettingsHandler.OnLoad();
+        AudioHandler.OnLoad();
+        NetworkHandler.OnLoad();
+        SceneHandler.OnLoad();
 
-        ReadWTFfile();
-
-        LoadedMPQs = new List<MpqArchive>();
         LoadMPQFiles();
-
+        ParseXML(@"INTERFACE\GLUEXML\GLUEPARENT.XML");
         SetPointer(@"Interface\CURSOR\Point.blp");
+        
+        SceneHandler.Instance.SwitchToAuthScene();
     }
     public void LoadMPQFiles()
     {
-        string[] _mpqFiles = Directory.GetFiles(LAST_KNOWN_MPQ_DATA_FOLDER, "*.MPQ", SearchOption.AllDirectories);
+        string[] _mpqFiles = Directory.GetFiles(SettingsHandler.Instance.LAST_KNOWN_MPQ_DATA_FOLDER, "*.MPQ", SearchOption.AllDirectories);
         for (int i = _mpqFiles.Length - 1; i >= 0; i--)
         {
             MpqArchive archive = new MpqArchive(_mpqFiles[i]);
@@ -77,78 +70,84 @@ public class AppHandler : MonoBehaviour
 
                 switch (ext.ToUpper())
                 {
+                    case ".LUA":
+                        if (luaEntries.ContainsKey(fileName))
+                            luaEntries[fileName] = LoadedMPQs.Count - 1;
+                        else
+                            luaEntries.Add(fileName, LoadedMPQs.Count - 1);
+                        break;
                     case ".XML":
                         if (xmlEntries.ContainsKey(fileName))
-                            xmlEntries[fileName] = archive;
+                            xmlEntries[fileName] = LoadedMPQs.Count - 1;
                         else
-                            xmlEntries.Add(fileName, archive);
+                            xmlEntries.Add(fileName, LoadedMPQs.Count - 1);
                         break;
                     case ".ADT":
                         if (adtEntries.ContainsKey(fileName))
-                            adtEntries[fileName] = archive;
+                            adtEntries[fileName] = LoadedMPQs.Count - 1;
                         else
-                            adtEntries.Add(fileName, archive);
+                            adtEntries.Add(fileName, LoadedMPQs.Count - 1);
                         break;
                     case ".WDT":
                         if (wdtEntries.ContainsKey(fileName))
-                            wdtEntries[fileName] = archive;
+                            wdtEntries[fileName] = LoadedMPQs.Count - 1;
                         else
-                            wdtEntries.Add(fileName, archive);
+                            wdtEntries.Add(fileName, LoadedMPQs.Count - 1);
                         break;
                     case ".WDL":
                         if (wdlEntries.ContainsKey(fileName))
-                            wdlEntries[fileName] = archive;
+                            wdlEntries[fileName] = LoadedMPQs.Count - 1;
                         else
-                            wdlEntries.Add(fileName, archive);
+                            wdlEntries.Add(fileName, LoadedMPQs.Count - 1);
                         break;
                     case ".WMO":
                         if (wmoEntries.ContainsKey(fileName))
-                            wmoEntries[fileName] = archive;
+                            wmoEntries[fileName] = LoadedMPQs.Count - 1;
                         else
-                            wmoEntries.Add(fileName, archive);
+                            wmoEntries.Add(fileName, LoadedMPQs.Count - 1);
                         break;
                     case ".M2":
                         if (m2Entries.ContainsKey(fileName))
-                            m2Entries[fileName] = archive;
+                            m2Entries[fileName] = LoadedMPQs.Count - 1;
                         else
-                            m2Entries.Add(fileName, archive);
+                            m2Entries.Add(fileName, LoadedMPQs.Count - 1);
                         break;
                     case ".BLP":
                         if (blpEntries.ContainsKey(fileName))
-                            blpEntries[fileName] = archive;
+                            blpEntries[fileName] = LoadedMPQs.Count - 1;
                         else
-                            blpEntries.Add(fileName, archive);
+                            blpEntries.Add(fileName, LoadedMPQs.Count - 1);
                         break;
                     case ".BLS":
                         if (blsEntries.ContainsKey(fileName))
-                            blsEntries[fileName] = archive;
+                            blsEntries[fileName] = LoadedMPQs.Count - 1;
                         else
-                            blsEntries.Add(fileName, archive);
+                            blsEntries.Add(fileName, LoadedMPQs.Count - 1);
                         break;
                     case ".SKIN":
                         if (skinEntries.ContainsKey(fileName))
-                            skinEntries[fileName] = archive;
+                            skinEntries[fileName] = LoadedMPQs.Count - 1;
                         else
-                            skinEntries.Add(fileName, archive);
+                            skinEntries.Add(fileName, LoadedMPQs.Count - 1);
                         break;
                     case ".DBC":
                         if (dbcEntries.ContainsKey(fileName))
-                            dbcEntries[fileName] = archive;
+                            dbcEntries[fileName] = LoadedMPQs.Count - 1;
                         else
-                            dbcEntries.Add(fileName, archive);
+                            dbcEntries.Add(fileName, LoadedMPQs.Count - 1);
                         break;
                     case ".ANIM":
                         if (animEntries.ContainsKey(fileName))
-                            animEntries[fileName] = archive;
+                            animEntries[fileName] = LoadedMPQs.Count - 1;
                         else
-                            animEntries.Add(fileName, archive);
+                            animEntries.Add(fileName, LoadedMPQs.Count - 1);
                         break;
                     case ".WAV":
                     case ".MP3":
                         if (audioEntries.ContainsKey(fileName))
-                            audioEntries[fileName] = archive;
+                            audioEntries[fileName] = LoadedMPQs.Count - 1;
                         else
-                            audioEntries.Add(fileName, archive);
+                            audioEntries.Add(fileName, LoadedMPQs.Count - 1);
                         break;
                 }
             }
@@ -159,7 +158,7 @@ public class AppHandler : MonoBehaviour
         text = text.ToUpper();
         string ext = Path.GetExtension(text);
 
-        MpqArchive value = null;
+        int value = -1;
 
         switch (ext.ToUpper())
         {
@@ -214,9 +213,9 @@ public class AppHandler : MonoBehaviour
                 break;
         }
 
-        if (value != null)
+        if (value != -1)
         {
-            return value.OpenFile(text);
+            return LoadedMPQs[value].OpenFile(text);
         }
         else
             return null;
@@ -232,91 +231,50 @@ public class AppHandler : MonoBehaviour
             cursorCache.Add(pointerLocation.ToUpper(), BLPLoader.ToTex(SearchMPQ(pointerLocation)));
             newPointer = cursorCache[pointerLocation.ToUpper()];
         }
-        
+
         Cursor.SetCursor(newPointer, hotSpot, cursorMode);
     }
-    public void ReadWTFfile()
+    void ParseXML(string xml)
     {
-        string path = @Application.dataPath + "/data.wtf";
-        if (!File.Exists(path))
+        XmlDocument xDoc = new XmlDocument();
+        xDoc.Load(SearchMPQ(xml));
+
+        // Get the root element
+        XmlNode buttonNode = xDoc.SelectSingleNode("//Button[@name='AccountNameButton']");
+
+        if (buttonNode != null)
         {
-            File.Create(path).Close();
+            // Get the Layers child element
+            XmlNode layersNode = buttonNode.SelectSingleNode("Layers");
 
-            using (StreamWriter w = File.AppendText(path))
-            {
-                w.WriteLine("REALM_LIST_ADDRESS " + REALM_LIST_ADDRESS);
-                w.WriteLine("LAST_KNOWN_REALMNAME " + LAST_KNOWN_REALMNAME);
-                w.WriteLine("LAST_KNOWN_REALM_PORT " + LAST_KNOWN_REALM_PORT.ToString());
-                w.WriteLine("LAST_KNOWN_MPQ_DATA_FOLDER " + LAST_KNOWN_MPQ_DATA_FOLDER);
-                w.WriteLine("WEBSITE_LINK " + WEBSITE_LINK);
-                w.WriteLine("MANAGE_ACCOUNT_LINK " + MANAGE_ACCOUNT_LINK);
-                w.Close();
-            }
-        }
+            // Get the ARTWORK Layer child element
+            XmlNode artworkLayerNode = layersNode.SelectSingleNode("Layer[@level='ARTWORK']");
 
-        string[] Config = File.ReadAllLines(path);
+            // Get the BGHighlight Texture child element
+            XmlNode bgHighlightNode = artworkLayerNode.SelectSingleNode("Texture[@name='$parentBGHighlight']");
 
-        foreach (string line in Config)
+            // Get the Anchors of the BGHighlight Texture element
+            XmlNode anchorsNode = bgHighlightNode.SelectSingleNode("Anchors");
+
+            // Get the Anchor element with point='LEFT'
+            XmlNode leftAnchorNode = anchorsNode.SelectSingleNode("Anchor[@point='LEFT']");
+
+            // Get the Offset child element of the left Anchor element
+            XmlNode offsetNode = leftAnchorNode.SelectSingleNode("Offset");
+
+            // Get the x and y attributes of the Offset element
+            string xValue = offsetNode.Attributes["x"].Value;
+            string yValue = offsetNode.Attributes["y"].Value;
+
+            Console.WriteLine($"x = {xValue}, y = {yValue}");
+
+            /*XmlNodeList scriptNodes = xDoc.GetElementsByTagName("Script");
+        foreach (XmlNode scriptNode in scriptNodes)
         {
-            if (line.Contains("REALM_LIST_ADDRESS "))
-            {
-                REALM_LIST_ADDRESS = line.Substring(19);
-            }
-            if (line.Contains("LAST_KNOWN_REALMNAME "))
-            {
-                LAST_KNOWN_REALMNAME = line.Substring(21);
-            }
-            if (line.Contains("LAST_KNOWN_REALM_PORT "))
-            {
-                LAST_KNOWN_REALM_PORT = int.Parse(line.Substring(22));
-            }
-            if (line.Contains("LAST_KNOWN_MPQ_DATA_FOLDER "))
-            {
-                LAST_KNOWN_MPQ_DATA_FOLDER = line.Substring(27);
-            }
-            if (line.Contains("WEBSITE_LINK "))
-            {
-                WEBSITE_LINK = line.Substring(13);
-            }
-            if (line.Contains("MANAGE_ACCOUNT_LINK "))
-            {
-                MANAGE_ACCOUNT_LINK = line.Substring(20);
-            }
+            string fileAttributeValue = scriptNode.Attributes["file"].Value;
         }
-    }
-    public void WriteWTFfile()
-    {
-        string path = @Application.dataPath + "/data.wtf";
-        if (!File.Exists(path))
-        {
-            File.Create(path).Close();
-
-            using (StreamWriter w = File.AppendText(path))
-            {
-                w.WriteLine("REALM_LIST_ADDRESS " + REALM_LIST_ADDRESS);
-                w.WriteLine("LAST_KNOWN_REALMNAME " + LAST_KNOWN_REALMNAME);
-                w.WriteLine("LAST_KNOWN_REALM_PORT " + LAST_KNOWN_REALM_PORT.ToString());
-                w.WriteLine("LAST_KNOWN_MPQ_DATA_FOLDER " + LAST_KNOWN_MPQ_DATA_FOLDER);
-                w.WriteLine("WEBSITE_LINK " + WEBSITE_LINK);
-                w.WriteLine("MANAGE_ACCOUNT_LINK " + MANAGE_ACCOUNT_LINK);
-            }
+        xDoc.Save(Application.dataPath + "//sf.xml");*/
         }
-        else
-        {
-            File.Delete(path);
-            File.Create(path).Close();
-
-            using (StreamWriter w = File.AppendText(path))
-            {
-                w.WriteLine("REALM_LIST_ADDRESS " + REALM_LIST_ADDRESS);
-                w.WriteLine("LAST_KNOWN_REALMNAME " + LAST_KNOWN_REALMNAME);
-                w.WriteLine("LAST_KNOWN_REALM_PORT " + LAST_KNOWN_REALM_PORT.ToString());
-                w.WriteLine("LAST_KNOWN_MPQ_DATA_FOLDER " + LAST_KNOWN_MPQ_DATA_FOLDER);
-                w.WriteLine("WEBSITE_LINK " + WEBSITE_LINK);
-                w.WriteLine("MANAGE_ACCOUNT_LINK " + MANAGE_ACCOUNT_LINK);
-            }
-        }
-    }
     private void OnDisable()
     {
         foreach (MpqArchive mpq in LoadedMPQs)
