@@ -266,7 +266,7 @@ public class AppHandler : MonoBehaviour
             string xValue = offsetNode.Attributes["x"].Value;
             string yValue = offsetNode.Attributes["y"].Value;
 
-            Console.WriteLine($"x = {xValue}, y = {yValue}");
+            //Console.WriteLine($"x = {xValue}, y = {yValue}");
 
             /*XmlNodeList scriptNodes = xDoc.GetElementsByTagName("Script");
         foreach (XmlNode scriptNode in scriptNodes)
@@ -275,6 +275,7 @@ public class AppHandler : MonoBehaviour
         }
         xDoc.Save(Application.dataPath + "//sf.xml");*/
         }
+    }
     private void OnDisable()
     {
         foreach (MpqArchive mpq in LoadedMPQs)
