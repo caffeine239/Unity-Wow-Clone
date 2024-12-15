@@ -7,4 +7,4 @@ A simple client made with Unity3D for trinitycore and mangos 3.3.5 servers.
 This project uses trademarked images/audio/models all rights go to Blizzard entertainment.
 
 
-![ScreenShot](https://raw.githubusercontent.com/caffeine239/Unity3DWoW/master/Screenshot01.png)
+[![Video Title]([assets/video-thumbnail.png](https://raw.githubusercontent.com/caffeine239/Unity3DWoW/master/Screenshot01.png))]([https://www.youtube.com/watch?v=YOUR_VIDEO_ID](https://www.youtube.com/watch?v=AtdNdf68WL8))
